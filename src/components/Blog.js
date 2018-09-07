@@ -1,10 +1,15 @@
 import React, { Component } from 'react';
+import { 
+    Stitch,
+    RemoteMongoClient,
+    AnonymousCredential
+} from "mongodb-stitch-browser-sdk";
 
 // Initialize the App Client
-const client = stitch.Stitch.initializeDefaultAppClient("blogtutorial-lvjyx");
+const client = Stitch.initializeDefaultAppClient("blogtutorial-lvjyx");
 // Get a MongoDB Service Client
 const mongodb = client.getServiceClient(
-  stitch.RemoteMongoClient.factory,
+  RemoteMongoClient.factory,
   "mongodb-atlas"
 );
 // Get a reference to the blog database
@@ -21,7 +26,7 @@ class Blog extends Component {
 
 	componentDidMount() {
     client.auth
-      .loginWithCredential(new stitch.AnonymousCredential())
+      .loginWithCredential(new AnonymousCredential())
       .then(this.retreiveComments())
       .catch(console.error);
 	}
@@ -64,7 +69,10 @@ class Blog extends Component {
     console.log("add comment", client.auth.user.id)
     db.collection("comments")
       .insertOne({ owner_id : client.auth.user.id, comment })
-      .then(() => this.retreiveComments());
+      .then(() => {
+      	this.retreiveComments();
+      	Stitch.defaultAppClient.callFunction("twilio").then(console.log('Sent'));
+      });
     this.setState({ commentField: '' });
 	} 	
 }
