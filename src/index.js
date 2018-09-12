@@ -1,8 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Blog from './components/Blog';
+import BlogContainer from './containers/BlogContainer';
 
-ReactDOM.render(
-  <Blog />,
-	document.getElementById('root')
-);
+ReactDOM.render(<BlogContainer />, document.getElementById('root'));

@@ -1,52 +1,20 @@
 import React, { Component } from 'react';
-import { 
-    Stitch,
-    RemoteMongoClient,
-    AnonymousCredential
-} from "mongodb-stitch-browser-sdk";
-
-// Initialize the App Client
-const client = Stitch.initializeDefaultAppClient("blogtutorial-lvjyx");
-// Get a MongoDB Service Client
-const mongodb = client.getServiceClient(
-  RemoteMongoClient.factory,
-  "mongodb-atlas"
-);
-// Get a reference to the blog database
-const db = mongodb.db("blog");
 
 class Blog extends Component {
 	constructor(props) {
 		super(props);
-		this.state = {
-			comments: [],
-			commentField: ''
-		}
-	}
-
-	componentDidMount() {
-    client.auth
-      .loginWithCredential(new AnonymousCredential())
-      .then(this.retreiveComments())
-      .catch(console.error);
+		this.state = { commentField: '' }
 	}
 
 	render() {
-		const { comments, commentField } = this.state;
+		const { commentField } = this.state;
 
 		return (
 	    <div>
-	    	<h3>This is a great blog post</h3>
-		    <div id="content">
-		      I like to write about technology because I want to get on the
-		      front page of hacker news.
-		    </div>
+	    	<h3>This is a great blog post!</h3>
+		    <div id="content">Here is my amazing blog post.</div>
 	    	<hr />
-	    	<div id="comments">
-					{comments.map(({ comment, _id }) => {
-						return <div key={_id}>{comment}</div>
-					})}
-	    	</div>
+	    	{this.renderComments()}
 	    	<hr />
 	    	Add comment:
 	    	<input value={commentField} onChange={e => this.setState({ commentField: e.target.value })} />
@@ -55,24 +23,26 @@ class Blog extends Component {
 		)
 	}
 
-	retreiveComments() {
-	  db.collection("comments")
-	    .find({}, {limit: 1000})
-	    .asArray()
-	    .then(comments => this.setState({ comments }))
+	renderComments() {
+	  const { comments } = this.props;
+
+	  return (  	
+    	<div id="comments">
+				{comments.map(({ comment, _id }) => {
+					return (
+						<div key={_id}>
+							{comment}
+							<button onClick={() => this.props.deleteComment(_id)}>delete</button>
+						</div>
+					);
+				})}
+    	</div>
+	  );
 	}
 
 	handleClick(e) {
 		e.preventDefault();
-
-		const comment = this.state.commentField;
-    console.log("add comment", client.auth.user.id)
-    db.collection("comments")
-      .insertOne({ owner_id : client.auth.user.id, comment })
-      .then(() => {
-      	this.retreiveComments();
-      	Stitch.defaultAppClient.callFunction("twilio").then(console.log('Sent'));
-      });
+		this.props.addComment(this.state.commentField);
     this.setState({ commentField: '' });
 	} 	
 }
