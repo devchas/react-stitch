@@ -7,7 +7,7 @@ import {
 import Blog from '../components/Blog';
 
 // Initialize the App Client
-const client = Stitch.initializeDefaultAppClient("blogtutorial-lvjyx");
+const client = Stitch.initializeDefaultAppClient("<your-app-id>");
 // Get a MongoDB Service Client
 const mongodb = client.getServiceClient(
   RemoteMongoClient.factory,
@@ -25,7 +25,7 @@ class BlogContainer extends Component {
 	componentDidMount() {
     client.auth
       .loginWithCredential(new AnonymousCredential())
-      .then(this.retreiveComments())
+      .then(this.retrieveComments())
       .catch(console.error);
 	}
 
@@ -39,7 +39,7 @@ class BlogContainer extends Component {
 		return <Blog {...props} />
 	}
 
-	retreiveComments() {
+	retrieveComments() {
 	  db.collection("comments")
 	    .find({}, {limit: 1000})
 	    .asArray()
@@ -49,13 +49,13 @@ class BlogContainer extends Component {
 	addComment(comment) {
     db.collection("comments")
       .insertOne({ owner_id : client.auth.user.id, comment })
-      .then(() => this.retreiveComments())
+      .then(() => this.retrieveComments())
 	}
 
 	deleteComment(_id) {
 		db.collection("comments")
 			.deleteOne({ _id })
-			.then(() => this.retreiveComments())
+			.then(() => this.retrieveComments())
 	}	
 }
 
